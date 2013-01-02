@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<title>COMP6026 Assignment 1: Methinks it is like a weasel</title>
+		<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+	</head>
+	<body>
+		Target String:
+		<input id="target" value="Methinks it is like a weasel"></input></br>
+		<input type="submit"></input><br />
+		<input type="textarea"></input>
+		<script>
+		$(document).ready(function () {
+			var population = [];
+			var target = $('#target').val();
+
+			function Individual(length) {
+				var genotype = new Array();
+				function generateRandom(length) {
+					var possible = "abcdefghijklmnopqrstuvwxyz ";
+					for (var i = genotype.length - 1; i >= 0; i--) {
+						genotype[i] = possible.charAt(Math.floor(Math.random() * possible.length));
+					};
+				}
+
+				var
+			}
+		};
+	</body>
+</html>
