@@ -10,8 +10,10 @@
 		<input type="textarea"></input>
 		<script>
 		$(document).ready(function () {
+			var popSize = 500;
 			var population = [];
 			var target = $('#target').val();
+			var maxFitness = 0;
 			console.log(target);
 
 			function Individual(length, givenGenotype) {
@@ -21,7 +23,6 @@
 						for (var i = length - 1; i >= 0; i--) {
 							newGenotype[i] = possible.charAt(Math.floor(Math.random() * possible.length));
 						};
-						console.log(newGenotype);
 						return newGenotype;
 					})(length);
 
@@ -35,9 +36,13 @@
 							}
 						};
 					}
-					console.log(fitness);
+					// console.log(fitness);
 					return fitness;
 				})();
+
+				this.getGenotype = function() {
+					return genotype;
+				};
 
 				this.mutate = function() {
 					var suppliedGenotype = new Array();
@@ -50,17 +55,52 @@
 					};
 					return new Individual(genotype.length, suppliedGenotype);
 				}
-			}
 
-			window.indie = new Individual(target.length);
-			console.log(window.indie);
-			while(window.indie.getFitness() < target.length) {
-				offspring = window.indie.mutate();
-				if (offspring.getFitness() > window.indie.getFitness()) {
-					window.indie = offspring;
+				this.crossover = function(mate) {
+					var suppliedGenotype = new Array();
+					for (var i = genotype.length - 1; i >= 0; i--) {
+						if (Math.random() < 0.5) {
+							suppliedGenotype[i] = genotype[i];
+						} else {
+							suppliedGenotype[i] = mate.getGenotype()[i];
+						}
+					};
+					return new Individual(genotype.length, suppliedGenotype);
+
 				}
 			}
-			console.log("done");
+
+			for (var i = popSize - 1; i >= 0; i--) {
+				population[i] = new Individual(target.length);
+				maxFitness = (population[i].getFitness() > maxFitness)? population[i].getFitness() : maxFitness;
+			}
+			console.log("Initial maxFitness: ", maxFitness);
+
+			function getRndIndividual() {
+				return population[Math.floor(Math.random() * population.length)]
+			}
+
+			var A, B, C, D, offspring;
+			while (maxFitness < target.length) {
+				A = getRndIndividual();
+				B = getRndIndividual();
+
+				offspring = (A.getFitness() > B.getFitness())? A.mutate() : B.mutate();
+
+				maxFitness = (offspring.getFitness() > maxFitness)? offspring.getFitness() : maxFitness;
+				console.log(maxFitness);
+				//TODO: replace less fit of two random members with offspring.
+				C = Math.floor(Math.random() * population.length);
+				D = Math.floor(Math.random() * population.length);
+
+				if (population[C].getFitness() < population[D].getFitness()) {
+					population[C] = offspring;
+				} else {
+					population[D] = offspring;
+				}
+			}
+			console.log("Done.");
+			console.log(offspring.getGenotype().join(""));
 		});
 		</script>
 	</body>
