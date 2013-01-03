@@ -1,15 +1,89 @@
 <html>
 	<head>
-		<title>COMP6026 Assignment 1: Methinks it is like a weasel</title>
+		<title>COMP6026 Assignment 2: Individual selection for co-operative group formation</title>
 		<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 	</head>
 	<body>
-		Target String:
-		<input id="target" value="methinks it is like a weasel"></input></br>
-		<input type="submit"></input><br />
-		<input type="textarea"></input>
+		base
 		<script>
 		$(document).ready(function () {
+
+			//from assignment notes page
+			var LARGE_SIZE = 40;
+			var SMALL_SIZE = 4;
+			var DEATH_RATE = 0.1;
+			var LARGE_RATE = 50;
+			var SMALL_RATE = 4;
+			//from section 3 of paper
+			var COOP_G = 0.018;
+			var SELF_G = 0.02;
+			var COOP_C = 0.1;
+			var COOP_C = 0.2;
+			var N = 4000;
+			var T = 1;
+			var t = 4;
+
+			var kinds = 4;
+			var LARGE_COOP = 0;
+			var LARGE_SELF = 1;
+			var SMALL_COOP = 2;
+			var SMALL_SELF = 3;
+
+			function Pool() {
+				//initialise with N individuals
+
+				var migrants = [N/kinds, N/kinds, N/kinds, N/kinds];
+				var data = [migrants.slice(0)]; //returns an identical copy (clone)
+
+				var large_groups = [];
+				var small_groups = [];
+
+				function Group (groupSize) {
+					// var COOP = 0;
+					// var SELF = 1;
+					var counts = [0,0];
+					var size = groupSize;
+
+					(function init() {
+						var offset = (groupSize == SMALL_SIZE)? 2 : 0;	//small individuals are in indexes 2 and 3
+						var total, index, selfish;
+						for (var i = size - 1; i >= 0; i--) {				//until this group is full
+							total = migrants[offset] + migrants[offset+1];	//total size of pool remaining
+							index = Math.random() * total;					//random index into pool
+							selfish = (index > migrants[offset]);			//is there a selfish individual at this offset?
+							migrants[offset+Number(selfish)]--;				//decrement the appropriate migrant pool
+							counts[Number(selfish)]++						//increment the pool in this group
+						};
+						
+					})();
+
+					function verify() {
+						return (counts[0] + counts[1]) == size;
+					}
+					console.log("Group verified:", verify());
+				}
+
+				//for T iterations
+				do {
+
+					//assign to groups
+					while (migrants[LARGE_COOP] + migrants[LARGE_SELF] >= LARGE_SIZE) {
+						large_groups.push(new Group(LARGE_SIZE));
+					}
+					while (migrants[SMALL_COOP] + migrants[SMALL_SELF] >= SMALL_SIZE) {
+						small_groups.push(new Group(SMALL_SIZE));
+					}
+
+					//discard spares
+					//// large_coop = large_self = small_coop = small_self = 0;
+					//reproduce each group for t steps
+					//return to pool
+					//rescale the pool
+					//save the data
+				} while (T-- >= 0);
+			}
+
+			new Pool();
 		});
 		</script>
 	</body>
