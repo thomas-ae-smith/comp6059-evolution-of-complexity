@@ -17,6 +17,7 @@
 			console.log(target);
 
 			function Individual(length, givenGenotype) {
+				Individual.evaluations = Individual.evaluations || 0;
 				var possible = "abcdefghijklmnopqrstuvwxyz ";
 				var genotype = givenGenotype || (function (length) {
 						newGenotype = new Array();
@@ -35,6 +36,7 @@
 								fitness++;
 							}
 						};
+						Individual.evaluations++;
 					}
 					// console.log(fitness);
 					return fitness;
@@ -80,27 +82,64 @@
 				return population[Math.floor(Math.random() * population.length)]
 			}
 
-			var A, B, C, D, offspring;
-			while (maxFitness < target.length) {
-				A = getRndIndividual();
-				B = getRndIndividual();
+			function GA(){
+				var A, B, C, D, offspring;
+				while (maxFitness < target.length) {
+					A = getRndIndividual();
+					B = getRndIndividual();
 
-				offspring = (A.getFitness() > B.getFitness())? A.mutate() : B.mutate();
+					offspring = (A.getFitness() > B.getFitness())? A.mutate() : B.mutate();
 
-				maxFitness = (offspring.getFitness() > maxFitness)? offspring.getFitness() : maxFitness;
-				console.log(maxFitness);
-				//TODO: replace less fit of two random members with offspring.
-				C = Math.floor(Math.random() * population.length);
-				D = Math.floor(Math.random() * population.length);
+					maxFitness = (offspring.getFitness() > maxFitness)? offspring.getFitness() : maxFitness;
+					console.log(maxFitness);
+					//TODO: replace less fit of two random members with offspring.
+					C = Math.floor(Math.random() * population.length);
+					D = Math.floor(Math.random() * population.length);
 
-				if (population[C].getFitness() < population[D].getFitness()) {
-					population[C] = offspring;
-				} else {
-					population[D] = offspring;
+					if (population[C].getFitness() < population[D].getFitness()) {
+						population[C] = offspring;
+					} else {
+						population[D] = offspring;
+					}
 				}
+				console.log("Done.");
+				console.log(offspring.getGenotype().join(""));
+				console.log(Individual.evaluations);
 			}
-			console.log("Done.");
-			console.log(offspring.getGenotype().join(""));
+
+
+			function GAwCO(){
+				var A, B, C, D, parent1, parent2, offspring;
+				while (maxFitness < target.length) {
+					A = getRndIndividual();
+					B = getRndIndividual();
+					parent1 = (A.getFitness() > B.getFitness())? A : B;
+					
+					A = getRndIndividual();
+					B = getRndIndividual();
+					parent2 = (A.getFitness() > B.getFitness())? A : B;
+
+					offspring = parent1.crossover(parent2).mutate();
+
+					maxFitness = (offspring.getFitness() > maxFitness)? offspring.getFitness() : maxFitness;
+					console.log(maxFitness);
+					//TODO: replace less fit of two random members with offspring.
+					C = Math.floor(Math.random() * population.length);
+					D = Math.floor(Math.random() * population.length);
+
+					if (population[C].getFitness() < population[D].getFitness()) {
+						population[C] = offspring;
+					} else {
+						population[D] = offspring;
+					}
+				}
+				console.log("Done.");
+				console.log(offspring.getGenotype().join(""));
+				console.log(Individual.evaluations);
+			}
+
+			GAwCO();
+
 		});
 		</script>
 	</body>
