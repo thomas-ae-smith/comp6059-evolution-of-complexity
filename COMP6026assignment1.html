@@ -5,25 +5,63 @@
 	</head>
 	<body>
 		Target String:
-		<input id="target" value="Methinks it is like a weasel"></input></br>
+		<input id="target" value="methinks it is like a weasel"></input></br>
 		<input type="submit"></input><br />
 		<input type="textarea"></input>
 		<script>
 		$(document).ready(function () {
 			var population = [];
 			var target = $('#target').val();
+			console.log(target);
 
-			function Individual(length) {
-				var genotype = new Array();
-				function generateRandom(length) {
-					var possible = "abcdefghijklmnopqrstuvwxyz ";
+			function Individual(length, givenGenotype) {
+				var possible = "abcdefghijklmnopqrstuvwxyz ";
+				var genotype = givenGenotype || (function (length) {
+						newGenotype = new Array();
+						for (var i = length - 1; i >= 0; i--) {
+							newGenotype[i] = possible.charAt(Math.floor(Math.random() * possible.length));
+						};
+						console.log(newGenotype);
+						return newGenotype;
+					})(length);
+
+				var fitness = -1;
+				(this.getFitness = function() {
+					if (fitness == -1) {
+						fitness = 0;
+						for (var i = genotype.length - 1; i >= 0; i--) {
+							if (genotype[i] == target[i]) {
+								fitness++;
+							}
+						};
+					}
+					console.log(fitness);
+					return fitness;
+				})();
+
+				this.mutate = function() {
+					var suppliedGenotype = new Array();
 					for (var i = genotype.length - 1; i >= 0; i--) {
-						genotype[i] = possible.charAt(Math.floor(Math.random() * possible.length));
+						if (Math.random() < 1/genotype.length) {
+							suppliedGenotype[i] = possible.charAt(Math.floor(Math.random() * possible.length));
+						} else {
+							suppliedGenotype[i] = genotype[i];
+						}
 					};
+					return new Individual(genotype.length, suppliedGenotype);
 				}
-
-				var
 			}
-		};
+
+			window.indie = new Individual(target.length);
+			console.log(window.indie);
+			while(window.indie.getFitness() < target.length) {
+				offspring = window.indie.mutate();
+				if (offspring.getFitness() > window.indie.getFitness()) {
+					window.indie = offspring;
+				}
+			}
+			console.log("done");
+		});
+		</script>
 	</body>
 </html>
