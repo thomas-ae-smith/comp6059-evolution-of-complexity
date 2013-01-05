@@ -4,7 +4,8 @@
 		<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 	</head>
 	<body>
-		base
+		<div class="data">
+		</div>
 		<script>
 		$(document).ready(function () {
 
@@ -21,7 +22,7 @@
 			var GROWTH_R = [0.018, 0.02];
 			var CONSUME_R = [0.1, 0.2];
 			var N = 4000;
-			var T = 1000;
+			var T = 120;
 			var t = 4;
 
 			var kinds = 4;
@@ -81,8 +82,13 @@
 				}
 
 				//for T iterations
-				 while (T-- > 0) {
-					console.log("T" + T + ":");
+				while (T-- > 0) {
+					//for aggregate.dat
+					// $(".data").append(/*120-T + ": " + */(migrants[0]+migrants[1])/N + " " + (migrants[1]+migrants[3])/N + "<br />");
+					
+					//for individual.dat
+					$(".data").append(migrants[0]/N + " " + migrants[1]/N + " " + migrants[2]/N + " " + migrants[3]/N + "<br />");
+
 					//assign to groups (spares are unused)
 					while (migrants[LARGE_COOP] + migrants[LARGE_SELF] >= GROUP_SIZE[LARGE]) {
 						large_groups.push(new Group(LARGE));
