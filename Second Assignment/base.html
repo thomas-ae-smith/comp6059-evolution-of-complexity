@@ -34,7 +34,8 @@
 			function Pool() {
 				//initialise with N individuals
 
-				var migrants = [N/kinds, N/kinds, N/kinds, N/kinds];
+				// var migrants = [N/kinds, N/kinds, N/kinds, N/kinds];
+				var migrants = [N/(3*kinds), (3*N)/kinds, N/(3*kinds), N/(3*kinds)];
 				console.log(migrants.slice(0));
 				var data = [migrants.slice(0)]; //returns an identical copy (clone)
 
