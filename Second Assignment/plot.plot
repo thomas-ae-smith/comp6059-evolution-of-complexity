@@ -2,6 +2,9 @@
 set terminal postscript eps
 set output '| epstopdf --filter --outfile=plot.pdf'
 
+#function setup
+sum(x, y) = x + y
+
 #canvas setup
 set size 1.0, 0.5
 set origin 0.0, 0.0
@@ -23,8 +26,8 @@ set origin 0.0, 0.0
 set xlabel "Generation"
 set ylabel "Global frequency"
 set key at graph 1.1, 0.9 Left reverse samplen 1
-plot "aggregate.dat" using 1 title 'Large group size' w l ls 4, \
-	 ""				 using 2 title 'Selfish resource usage' w l ls 1
+plot "individual.dat" using (sum($1, $2)) title 'Large group size' w l ls 4, \
+	 ""				  using (sum($2, $4)) title 'Selfish resource usage' w l ls 1
 
 
 #individual plot setup
