@@ -24,7 +24,7 @@
 			var GROWTH_R = [0.018, 0.02];
 			var CONSUME_R = [0.1, 0.2];
 			var N = 4000;	//4000
-			var T = 120;	//120
+			var T = 500;	//120
 			var t = 4;
 
 			//my own invention
@@ -39,7 +39,8 @@
 			function Pool() {
 				//initialise with N individuals
 
-				var migrants = [[N/kinds, N/kinds], [N/kinds, N/kinds]];
+				// var migrants = [[N/kinds, N/kinds], [N/kinds, N/kinds]];
+				var migrants = [[N, 0], [0, 0]];
 				multi_each = function (multi, func) {
 					var total = 0;
 					$.each(multi, function (size, val) {
@@ -84,6 +85,19 @@
 							for (var i = counts[size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
 								if (Math.random() < MUTATE_RATE) {
 									offspring[(size_index)?0:1][plan_index]++;
+									// console.log("Mutation");
+								} else {
+									offspring[size_index][plan_index]++;
+								}
+							};
+						})
+						// console.log("counts: " , counts, "offspring: ", offspring);
+						counts = offspring;
+						offspring = [[0,0],[0,0]];
+						multi_each(counts, function(size_index, plan_index) {		//for each genotype
+							for (var i = counts[size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
+								if (Math.random() < MUTATE_RATE) {
+									offspring[size_index][(plan_index)?0:1]++;
 									// console.log("Mutation");
 								} else {
 									offspring[size_index][plan_index]++;
