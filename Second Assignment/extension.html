@@ -23,9 +23,12 @@
 			//from section 3 of paper [coop, self]
 			var GROWTH_R = [0.018, 0.02];
 			var CONSUME_R = [0.1, 0.2];
-			var N = 4000;
-			var T = 120;
+			var N = 4000;	//4000
+			var T = 120;	//120
 			var t = 4;
+
+			//my own invention
+			var MUTATE_RATE = 0.002;
 
 			var kinds = 4;
 			var LARGE_COOP = 0;
@@ -39,9 +42,9 @@
 				var migrants = [[N/kinds, N/kinds], [N/kinds, N/kinds]];
 				multi_each = function (multi, func) {
 					var total = 0;
-					$.each(multi, function (ind1, val) {
-						$.each(val, function (ind2, value) {
-							total += func(ind2, val);
+					$.each(multi, function (size, val) {
+						$.each(val, function (plan, value) {
+							total += func(size, plan);
 						})
 					})
 					return total;
@@ -70,29 +73,46 @@
 					})();
 
 					function verify() {				//use multi_each on counts to sum all groups, check correct
-						return (multi_each(counts, function(index,value) {
-							return value[index];
+						return (multi_each(counts, function(size_index, plan_index) {
+							return counts[size_index][plan_index];
 						})) == GROUP_SIZE[size];
+					}
+
+					this.mutate = function() {
+						var offspring = [[0,0],[0,0]];
+						multi_each(counts, function(size_index, plan_index) {		//for each genotype
+							for (var i = counts[size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
+								if (Math.random() < MUTATE_RATE) {
+									offspring[(size_index)?0:1][plan_index]++;
+									// console.log("Mutation");
+								} else {
+									offspring[size_index][plan_index]++;
+								}
+							};
+						})
+						// console.log("counts: " , counts, "offspring: ", offspring);
+						counts = offspring;
 					}
 
 					this.reproduce = function() {
 						var shares = [0,0];
 						var desire = [0,0];
-						desire[0] = counts[0] * GROWTH_R[0] * CONSUME_R[0];
-						desire[1] = counts[1] * GROWTH_R[1] * CONSUME_R[1];
+						desire[0] = counts[size][0] * GROWTH_R[0] * CONSUME_R[0];
+						desire[1] = counts[size][1] * GROWTH_R[1] * CONSUME_R[1];
 						shares[0] = INFLUX_RATE[size] * desire[0] / (desire[0] + desire[1]);
 						shares[1] = INFLUX_RATE[size] * desire[1] / (desire[0] + desire[1]);
-						counts[0] = counts[0] + shares[0]/CONSUME_R[0] - DEATH_RATE*counts[0];
-						counts[1] = counts[1] + shares[1]/CONSUME_R[1] - DEATH_RATE*counts[1];
+						counts[size][0] = Math.floor(counts[size][0] + shares[0]/CONSUME_R[0] - DEATH_RATE*counts[size][0]);
+						counts[size][1] = Math.floor(counts[size][1] + shares[1]/CONSUME_R[1] - DEATH_RATE*counts[size][1]);
+						this.mutate();
 					}
 
 					this.disperse = function() {
 						// var offset = groupSize * 2;			//small individuals are in indexes 2 and 3
-						migrants[size][0] += counts[0];
-						migrants[size][1] += counts[1];
-						// multi_each(counts, function(index, value) {
-						// 	migrants[ind1][ind2] += counts[ind1][ind2];
-						// })
+						// migrants[size][0] += counts[0];
+						// migrants[size][1] += counts[1];
+						multi_each(counts, function(size_index, plan_index) {
+							migrants[size_index][plan_index] += counts[size_index][plan_index];
+						})
 					}
 				}
 
@@ -103,6 +123,9 @@
 					
 					//for individual.dat
 					$(".data").append(migrants[LARGE][COOP]/N + " " + migrants[LARGE][SELF]/N + " " + migrants[SMALL][COOP]/N + " " + migrants[SMALL][SELF]/N + "<br />");
+
+					// for raw
+					// $(".data").append(migrants[LARGE][COOP] + " " + migrants[LARGE][SELF] + " " + migrants[SMALL][COOP] + " " + migrants[SMALL][SELF] + "<br />");
 
 					//assign to groups (spares are unused)
 					while (migrants[LARGE][COOP] + migrants[LARGE][SELF] >= GROUP_SIZE[LARGE]) {
@@ -124,8 +147,9 @@
 
 					//return to pool
 					// migrants = [[0, 0], [0, 0]];
-					multi_each(migrants, function(index, value) {
-						value[index] = 0;
+					console.log("killing " + migrants[LARGE][COOP] + " large coops");
+					multi_each(migrants, function(size, plan) {
+						migrants[size][plan] = 0;
 					})
 					$.each(large_groups, function (index, value){
 						value.disperse();
@@ -137,16 +161,16 @@
 
 					//rescale the pool
 					// var total = migrants[LARGE][COOP] + migrants[LARGE][SELF] + migrants[SMALL][COOP] + migrants[SMALL][SELF];
-					var total = multi_each(migrants, function(index, value) {
-						return value[index];
+					var total = multi_each(migrants, function(size, plan) {
+						return migrants[size][plan];
 					})
 					var scale = N/total;
 					// migrants[LARGE][COOP] *= scale;
 					// migrants[LARGE][SELF] *= scale;
 					// migrants[SMALL][COOP] *= scale;
 					// migrants[SMALL][SELF] *= scale;
-					multi_each(migrants, function(index, value) {
-						value[index] *= scale;
+					multi_each(migrants, function(size, plan) {
+						migrants[size][plan] = Math.floor(migrants[size][plan] * scale);
 					})
 
 					//save the data
