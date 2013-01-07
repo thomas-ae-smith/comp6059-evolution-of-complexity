@@ -109,14 +109,27 @@
 					}
 
 					this.reproduce = function() {
-						var shares = [0,0];
-						var desire = [0,0];
-						desire[0] = counts[size][0] * GROWTH_R[0] * CONSUME_R[0];
-						desire[1] = counts[size][1] * GROWTH_R[1] * CONSUME_R[1];
-						shares[0] = INFLUX_RATE[size] * desire[0] / (desire[0] + desire[1]);
-						shares[1] = INFLUX_RATE[size] * desire[1] / (desire[0] + desire[1]);
-						counts[size][0] = Math.floor(counts[size][0] + shares[0]/CONSUME_R[0] - DEATH_RATE*counts[size][0]);
-						counts[size][1] = Math.floor(counts[size][1] + shares[1]/CONSUME_R[1] - DEATH_RATE*counts[size][1]);
+						var shares = [[0,0],[0,0]];
+						var desire = [[0,0],[0,0]];
+						var totalDesire = 0;
+						multi_each(counts, function(s_ix, p_ix) {
+							desire[s_ix][p_ix] = counts[s_ix][p_ix] * GROWTH_R[p_ix] * CONSUME_R[p_ix];
+						});
+						// desire[0] = counts[size][0] * GROWTH_R[0] * CONSUME_R[0];
+						// desire[1] = counts[size][1] * GROWTH_R[1] * CONSUME_R[1];
+						totalDesire = multi_each(desire, function(s_ix, p_ix) {
+							return desire[s_ix][p_ix];
+						});
+						multi_each(counts, function(s_ix, p_ix) {
+							shares[s_ix][p_ix] = INFLUX_RATE[size] * desire[s_ix][p_ix] / totalDesire;
+						});
+						// shares[0] = INFLUX_RATE[size] * desire[0] / (desire[0] + desire[1]);
+						// shares[1] = INFLUX_RATE[size] * desire[1] / (desire[0] + desire[1]);
+						multi_each(counts, function(s_ix, p_ix) {
+							counts[s_ix][p_ix] = Math.floor(counts[s_ix][p_ix] + shares[s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[s_ix][p_ix]);
+						})
+						// counts[size][0] = Math.floor(counts[size][0] + shares[0]/CONSUME_R[0] - DEATH_RATE*counts[size][0]);
+						// counts[size][1] = Math.floor(counts[size][1] + shares[1]/CONSUME_R[1] - DEATH_RATE*counts[size][1]);
 						this.mutate();
 					}
 
