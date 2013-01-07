@@ -1,0 +1,220 @@
+<html>
+	<head>
+		<title>COMP6026 Assignment 2: Individual selection for co-operative group formation</title>
+		<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+	</head>
+	<body>
+		<div class="data">
+		</div>
+		<script>
+		$(document).ready(function () {
+
+			var MUTIE = 0;
+			var FIXED = 1;
+			var LARGE = 0;
+			var SMALL = 1;
+			var COOP = 0;
+			var SELF = 1;
+
+			//from assignment notes page [large, small]
+			var GROUP_SIZE = [40, 4];
+			var DEATH_RATE = 0.1;
+			var INFLUX_RATE = [50, 4];
+			//from section 3 of paper [coop, self]
+			var GROWTH_R = [0.018, 0.02];
+			var CONSUME_R = [0.1, 0.2];
+			var N = 4000;	//4000
+			var T = 500;	//120
+			var t = 4;
+
+			//extension
+			var MUTATE_RATE = 0.002;
+
+			var kinds = 4;
+			var LARGE_COOP = 0;
+			var LARGE_SELF = 1;
+			var SMALL_COOP = 2;
+			var SMALL_SELF = 3;
+
+			function Pool() {
+				//initialise with N individuals
+
+				// var migrants = [[N/kinds, N/kinds], [N/kinds, N/kinds]];
+				var migrants = [[[N, 0], [0, 0]],
+								[[0, 0], [0, 0]]];
+				multi_each = function (multi, func) {
+					var total = 0;
+					$.each(multi, function (adapt, val) {
+						$.each(val, function (size, valu) {
+							$.each(valu, function (plan, value) {
+								total += func(adapt, size, plan);
+							})
+						})
+					})
+					return total;
+				}
+				console.log(migrants.slice(0));
+				var data = [migrants.slice(0)]; //returns an identical copy (clone)
+
+				var large_groups = [];
+				var small_groups = [];
+
+				function Group (groupSize) {
+					var counts = [[[0,0],[0,0]],
+								  [[0,0],[0,0]]];
+					var size = groupSize;
+
+					(function init() {
+						var total, index, selfish, offset;
+						total = multi_each(migrants, function(adapt, size_index, plan) { 	//total of this size remaining
+							if (size_index == size) {
+								total += migrants[adapt][size_index][plan];
+							}
+						});
+						for (var i = GROUP_SIZE[size] - 1; i >= 0; i--) {				//until this group is full
+							index = Math.random() * total;					//random index into pool
+							offset = 0;
+							for (var i = 0; i < 4; i++) {
+								if (index < offset + migrants[(i >= 2)][size][i%2]) {
+									migrants[(i >= 2)][size][i%2]--;
+									counts[(i >= 2)][size][i%2]++;
+									break;
+								} else {
+									offset += migrants[(i >= 2)][size][i%2];
+								}
+							};
+							// selfish = (index > migrants[size][0]);			//is there a selfish individual at this offset?
+							// migrants[size][Number(selfish)]--;				//decrement the appropriate migrant pool
+							// counts[size][Number(selfish)]++;				//increment the pool in this group
+							total--;
+						};
+						
+					})();
+
+					function verify() {				//use multi_each on counts to sum all groups, check correct
+						return (multi_each(counts, function(adapt_index, size_index, plan_index) {
+							return counts[adapt_index][size_index][plan_index];
+						})) == GROUP_SIZE[size];
+					}
+
+					this.mutate = function() {
+						var offspring = [[[0,0],[0,0]],
+										 [[0,0],[0,0]]];
+						multi_each(counts, function(adapt_index, size_index, plan_index) {		//for each genotype
+							for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
+								if (Math.random() < MUTATE_RATE) {
+									offspring[adapt_index][(size_index)?0:1][plan_index]++;
+									// console.log("Mutation");
+								} else {
+									offspring[adapt_index][size_index][plan_index]++;
+								}
+							};
+						})
+						// console.log("counts: " , counts, "offspring: ", offspring);
+						counts = offspring;
+						offspring = [[[0,0],[0,0]],
+									 [[0,0],[0,0]]];
+						multi_each(counts, function(adapt_index, size_index, plan_index) {		//for each genotype
+							for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
+								if (Math.random() < MUTATE_RATE) {
+									offspring[adapt_index][size_index][(plan_index)?0:1]++;
+									// console.log("Mutation");
+								} else {
+									offspring[adapt_index][size_index][plan_index]++;
+								}
+							};
+						})
+						// console.log("counts: " , counts, "offspring: ", offspring);
+						counts = offspring;
+					}
+
+					this.reproduce = function() {
+						var shares = [0,0];
+						var desire = [0,0];
+						desire[0] = counts[size][0] * GROWTH_R[0] * CONSUME_R[0];
+						desire[1] = counts[size][1] * GROWTH_R[1] * CONSUME_R[1];
+						shares[0] = INFLUX_RATE[size] * desire[0] / (desire[0] + desire[1]);
+						shares[1] = INFLUX_RATE[size] * desire[1] / (desire[0] + desire[1]);
+						counts[size][0] = Math.floor(counts[size][0] + shares[0]/CONSUME_R[0] - DEATH_RATE*counts[size][0]);
+						counts[size][1] = Math.floor(counts[size][1] + shares[1]/CONSUME_R[1] - DEATH_RATE*counts[size][1]);
+						this.mutate();
+					}
+
+					this.disperse = function() {
+						// var offset = groupSize * 2;			//small individuals are in indexes 2 and 3
+						// migrants[size][0] += counts[0];
+						// migrants[size][1] += counts[1];
+						multi_each(counts, function(size_index, plan_index) {
+							migrants[size_index][plan_index] += counts[size_index][plan_index];
+						})
+					}
+				}
+
+				//for T iterations
+				while (T-- > 0) {
+					//for aggregate.dat
+					// $(".data").append(/*120-T + ": " + */(migrants[0]+migrants[1])/N + " " + (migrants[1]+migrants[3])/N + "<br />");
+					
+					//for individual.dat
+					$(".data").append(migrants[LARGE][COOP]/N + " " + migrants[LARGE][SELF]/N + " " + migrants[SMALL][COOP]/N + " " + migrants[SMALL][SELF]/N + "<br />");
+
+					// for raw
+					// $(".data").append(migrants[LARGE][COOP] + " " + migrants[LARGE][SELF] + " " + migrants[SMALL][COOP] + " " + migrants[SMALL][SELF] + "<br />");
+
+					//assign to groups (spares are unused)
+					while (migrants[LARGE][COOP] + migrants[LARGE][SELF] >= GROUP_SIZE[LARGE]) {
+						large_groups.push(new Group(LARGE));
+					}
+					while (migrants[SMALL][COOP] + migrants[SMALL][SELF] >= GROUP_SIZE[SMALL]) {
+						small_groups.push(new Group(SMALL));
+					}
+
+					//reproduce each group for t steps
+					for (var i = t - 1; i >= 0; i--) {
+						$.each(large_groups, function (index, value){
+							value.reproduce();
+						});
+						$.each(small_groups, function (index, value){
+							value.reproduce();
+						});
+					};
+
+					//return to pool
+					// migrants = [[0, 0], [0, 0]];
+					console.log("killing " + migrants[LARGE][COOP] + " large coops");
+					multi_each(migrants, function(size, plan) {
+						migrants[size][plan] = 0;
+					})
+					$.each(large_groups, function (index, value){
+						value.disperse();
+					});
+					$.each(small_groups, function (index, value){
+						value.disperse();
+					});
+					large_groups.length = small_groups.length = 0;
+
+					//rescale the pool
+					// var total = migrants[LARGE][COOP] + migrants[LARGE][SELF] + migrants[SMALL][COOP] + migrants[SMALL][SELF];
+					var total = multi_each(migrants, function(size, plan) {
+						return migrants[size][plan];
+					})
+					var scale = N/total;
+					// migrants[LARGE][COOP] *= scale;
+					// migrants[LARGE][SELF] *= scale;
+					// migrants[SMALL][COOP] *= scale;
+					// migrants[SMALL][SELF] *= scale;
+					multi_each(migrants, function(size, plan) {
+						migrants[size][plan] = Math.floor(migrants[size][plan] * scale);
+					})
+
+					//save the data
+					data.push(migrants.slice(0)); //store a clone
+				};
+					console.log(migrants.slice(0));
+			}
+
+			new Pool();
+		});
+		</script>
+	</body>
+</html>
