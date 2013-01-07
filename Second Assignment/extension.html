@@ -40,7 +40,11 @@
 				//initialise with N individuals
 
 				// var migrants = [[N/kinds, N/kinds], [N/kinds, N/kinds]];
-				var migrants = [[N, 0], [0, 0]];
+				function newDataStructure() {
+					return [[0, 0], [0, 0]];
+				}
+				var migrants = newDataStructure();
+				migrants[LARGE][COOP] = N;
 				multi_each = function (multi, func) {
 					var total = 0;
 					$.each(multi, function (size, val) {
@@ -51,13 +55,12 @@
 					return total;
 				}
 				console.log(migrants.slice(0));
-				var data = [migrants.slice(0)]; //returns an identical copy (clone)
 
 				var large_groups = [];
 				var small_groups = [];
 
 				function Group (groupSize) {
-					var counts = [[0,0],[0,0]];
+					var counts = newDataStructure();
 					var size = groupSize;
 
 					(function init() {
@@ -80,7 +83,7 @@
 					}
 
 					this.mutate = function() {
-						var offspring = [[0,0],[0,0]];
+						var offspring = newDataStructure();
 						multi_each(counts, function(size_index, plan_index) {		//for each genotype
 							for (var i = counts[size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
 								if (Math.random() < MUTATE_RATE) {
@@ -93,7 +96,7 @@
 						})
 						// console.log("counts: " , counts, "offspring: ", offspring);
 						counts = offspring;
-						offspring = [[0,0],[0,0]];
+						offspring = newDataStructure();
 						multi_each(counts, function(size_index, plan_index) {		//for each genotype
 							for (var i = counts[size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
 								if (Math.random() < MUTATE_RATE) {
@@ -109,34 +112,25 @@
 					}
 
 					this.reproduce = function() {
-						var shares = [[0,0],[0,0]];
-						var desire = [[0,0],[0,0]];
+						var shares = newDataStructure();
+						var desire = newDataStructure();
 						var totalDesire = 0;
-						multi_each(counts, function(s_ix, p_ix) {
+						multi_each(counts, function(s_ix, p_ix) {  //calulate Di = Ni*Gs*Cs or Ni*Gc*Cc
 							desire[s_ix][p_ix] = counts[s_ix][p_ix] * GROWTH_R[p_ix] * CONSUME_R[p_ix];
 						});
-						// desire[0] = counts[size][0] * GROWTH_R[0] * CONSUME_R[0];
-						// desire[1] = counts[size][1] * GROWTH_R[1] * CONSUME_R[1];
-						totalDesire = multi_each(desire, function(s_ix, p_ix) {
+						totalDesire = multi_each(desire, function(s_ix, p_ix) {		//total desire, natch
 							return desire[s_ix][p_ix];
 						});
-						multi_each(counts, function(s_ix, p_ix) {
+						multi_each(counts, function(s_ix, p_ix) {	//influx share Si = R*Di/∑Di
 							shares[s_ix][p_ix] = INFLUX_RATE[size] * desire[s_ix][p_ix] / totalDesire;
 						});
-						// shares[0] = INFLUX_RATE[size] * desire[0] / (desire[0] + desire[1]);
-						// shares[1] = INFLUX_RATE[size] * desire[1] / (desire[0] + desire[1]);
-						multi_each(counts, function(s_ix, p_ix) {
+						multi_each(counts, function(s_ix, p_ix) {	//Ni(t+1) = Ni(t) + Si/C(c/s) - K*Ni(t)
 							counts[s_ix][p_ix] = Math.floor(counts[s_ix][p_ix] + shares[s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[s_ix][p_ix]);
 						})
-						// counts[size][0] = Math.floor(counts[size][0] + shares[0]/CONSUME_R[0] - DEATH_RATE*counts[size][0]);
-						// counts[size][1] = Math.floor(counts[size][1] + shares[1]/CONSUME_R[1] - DEATH_RATE*counts[size][1]);
 						this.mutate();
 					}
 
 					this.disperse = function() {
-						// var offset = groupSize * 2;			//small individuals are in indexes 2 and 3
-						// migrants[size][0] += counts[0];
-						// migrants[size][1] += counts[1];
 						multi_each(counts, function(size_index, plan_index) {
 							migrants[size_index][plan_index] += counts[size_index][plan_index];
 						})
@@ -199,9 +193,6 @@
 					multi_each(migrants, function(size, plan) {
 						migrants[size][plan] = Math.floor(migrants[size][plan] * scale);
 					})
-
-					//save the data
-					data.push(migrants.slice(0)); //store a clone
 				};
 					console.log(migrants.slice(0));
 			}
