@@ -86,6 +86,14 @@ We used the parameters as in the original paper, plus these
 % o   Reimplementated Results (~1 page)
 % ?         The reimplemented figures (side by side with the originals)
 % ?         Discussion of what the results show/don't show, what worked/didn't work, what you learned
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[scale=1.25]{original.pdf}
+  \caption{Left-hand plot: average environment and strategy through time. Right-hand plot: change in genotype frequencies over time. (Original figure \citep{orig})}
+  \label{Figure:original}
+\end{figure}
+
 \begin{figure}[!ht]
   \centering
   \includegraphics{equalplot.pdf}
@@ -93,13 +101,8 @@ We used the parameters as in the original paper, plus these
   \label{Figure:plot}
 \end{figure}
 
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[scale=1.25]{original.pdf}
-  \caption{original plot.}
-  \label{Figure:original}
-\end{figure}
-
+All of the other genotypes eventually die out permanelty due to being outcompeted for resources (mention across and between groups varience) and then being scaled away in step 7[TODO: check]
+\clearpage
 \section{Extension}
 ~1 page
 % o   Describe your extension  (another page)
@@ -115,6 +118,11 @@ We used the parameters as in the original paper, plus these
 a numenbt or extensiotns of the original paper exist
 \citet{thesis} recommends altering the numebr of generations before breeding, or restiriction miigrations
 thise papers have done these things
+
+
+The original result can be shown to be quite robust: even in the case of severe imbalance in the inital genotype distribution, it is generally seen that the cooperative + small genotype successfully forms a niche and eventually fixes (Appendix A, figure [TODO]). However, this is only possible when there exists a critical minimum population of cooperative + small individuals to [TODO: swanky phrase about beating the initial disadvantage]. In the model as presented, if a particular genotype dies out or does not exist in the initial genotype distribution, then it is never possible for it to (re)enter the gene pool. In certain situations, this can be seen as disvantageous - for example, in the original model, if the cooperative + small individuals were able to form larger groups again once the selfish allele had been eradicated, then they could reap the resource bonus without exploitation by selfish individuals (as in Appendix A, figure [TODO]).
+
+As an extension to the original model, this paper then presents analysis of cases where individuals are allowed to change size preference, behaviour and their own mutation rate, in a manner similar to a low rate of mutation across the whole population.
 
 In the original paper, once a specific genotype has fixed, it is impossible for any other genotype to invade. Specifically, in order for any genotype to fix, all other genypes must be extinct.
 What happens if we add mutatoin?
@@ -149,6 +157,21 @@ on the order of one change in one group per cycle of reproduction, and so a valu
 % \end{thebibliography}
 
 \appendix
+\section{Additional cases TODO}
+\begin{figure}[!ht]
+  \centering
+  \includegraphics{equalplot.pdf}
+  \caption{My plot.}
+  \label{Figure:plot}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics{equalplot.pdf}
+  \caption{My plot.}
+  \label{Figure:plot}
+\end{figure}
+
 \section{Source}
 % Appendix: source code of what you implemented (include the source of everything you implemented as part of the pdf)
 % You may also upload a zip of all source code (if this includes any code you did not implement -- it must be clearly declared in a README file, and at the front of the report)
