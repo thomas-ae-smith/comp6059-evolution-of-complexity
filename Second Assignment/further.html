@@ -24,17 +24,17 @@
 			var GROWTH_R = [0.018, 0.02];
 			var CONSUME_R = [0.1, 0.2];
 			var N = 4000;	//4000
-			var T = 5000;	//120
+			var T = 120;	//120
 			var t = 4;
 
 			//extension
 			var MUTATE_RATE = 0.002;
 
-			var kinds = 4;
-			var LARGE_COOP = 0;
-			var LARGE_SELF = 1;
-			var SMALL_COOP = 2;
-			var SMALL_SELF = 3;
+			// var kinds = 4;
+			// var LARGE_COOP = 0;
+			// var LARGE_SELF = 1;
+			// var SMALL_COOP = 2;
+			// var SMALL_SELF = 3;
 
 			function Pool() {
 				//initialise with N individuals
@@ -46,10 +46,6 @@
 				}
 
 				var migrants = newDataStructure();
-				migrants[MUTIE][LARGE][COOP] = N/4;
-				migrants[MUTIE][LARGE][SELF] = N/4;
-				migrants[MUTIE][SMALL][COOP] = N/4;
-				migrants[MUTIE][SMALL][SELF] = N/4;
 				// migrants[MUTIE][LARGE][COOP] = N/8;
 				// migrants[MUTIE][LARGE][SELF] = N/8;
 				// migrants[MUTIE][SMALL][COOP] = N/8;
@@ -58,6 +54,10 @@
 				// migrants[FIXED][LARGE][SELF] = N/8;
 				// migrants[FIXED][SMALL][COOP] = N/8;
 				// migrants[FIXED][SMALL][SELF] = N/8;
+				migrants[FIXED][LARGE][COOP] = N/4;
+				migrants[FIXED][LARGE][SELF] = N/4;
+				migrants[FIXED][SMALL][COOP] = N/4;
+				migrants[FIXED][SMALL][SELF] = N/4;
 				multi_each = function (multi, func) {
 					var total = 0;
 					$.each(multi, function (adapt, val) {
@@ -118,16 +118,6 @@
 					}
 
 					this.mutate = function() {
-						// $(".data").append("Befor mutation: ");
-						// $(".data").append( counts[MUTIE][LARGE][COOP] + " " +
-						// 					 counts[MUTIE][LARGE][SELF] + " " +
-						// 					 counts[MUTIE][SMALL][COOP] + " " +
-						// 					 counts[MUTIE][SMALL][SELF] + " " +
-						// 					 counts[FIXED][LARGE][COOP] + " " +
-						// 					 counts[FIXED][LARGE][SELF] + " " +
-						// 					 counts[FIXED][SMALL][COOP] + " " +
-						// 					 counts[FIXED][SMALL][SELF] );
-						// $(".data").append("<br />");
 						var offspring = newDataStructure();
 						multi_each(counts, function(adapt_index, size_index, plan_index) {		//for each genotype
 							if (adapt_index == MUTIE) {		//if you can mutate, do so
@@ -201,13 +191,13 @@
 						totalDesire = multi_each(desire, function(a_ix, s_ix, p_ix) {		//total desire, natch
 							return desire[a_ix][s_ix][p_ix];
 						});
-						multi_each(counts, function(a_ix, s_ix, p_ix) {	//influx share Si = R*Di/∑Di
+						multi_each(counts, function(a_ix, s_ix, p_ix) {	//influx share Si = R*Di/∑Di (use the actual group size for influx rate)
 							shares[a_ix][s_ix][p_ix] = INFLUX_RATE[size] * desire[a_ix][s_ix][p_ix] / totalDesire;
 						});
 						multi_each(counts, function(a_ix, s_ix, p_ix) {	//Ni(t+1) = Ni(t) + Si/C(c/s) - K*Ni(t)
 							counts[a_ix][s_ix][p_ix] = Math.floor(counts[a_ix][s_ix][p_ix] + shares[a_ix][s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[a_ix][s_ix][p_ix]);
 						})
-						this.mutate();
+						// this.mutate();
 					}
 
 
@@ -256,9 +246,7 @@
 
 					//return to pool
 					console.log("killing " + migrants[FIXED][LARGE][COOP] + " large coops");
-					multi_each(migrants, function(adapt, size, plan) {
-						migrants[adapt][size][plan] = 0;
-					})
+					migrants = newDataStructure();
 					$.each(large_groups, function (index, value){
 						value.disperse();
 					});
@@ -275,7 +263,6 @@
 					// $(".data").append("<br />");
 
 					//rescale the pool
-					var total = migrants[LARGE][COOP] + migrants[LARGE][SELF] + migrants[SMALL][COOP] + migrants[SMALL][SELF];
 					var total = multi_each(migrants, function(adapt, size, plan) {
 						return migrants[adapt][size][plan];
 					})
