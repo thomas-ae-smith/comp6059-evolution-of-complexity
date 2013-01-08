@@ -24,7 +24,7 @@
 			var GROWTH_R = [0.018, 0.02];
 			var CONSUME_R = [0.1, 0.2];
 			var N = 4000;	//4000
-			var T = 60;	//120
+			var T = 5000;	//120
 			var t = 4;
 
 			//extension
@@ -46,14 +46,18 @@
 				}
 
 				var migrants = newDataStructure();
-				migrants[MUTIE][LARGE][COOP] = N/8;
-				migrants[MUTIE][LARGE][SELF] = N/8;
-				migrants[MUTIE][SMALL][COOP] = N/8;
-				migrants[MUTIE][SMALL][SELF] = N/8;
-				migrants[FIXED][LARGE][COOP] = N/8;
-				migrants[FIXED][LARGE][SELF] = N/8;
-				migrants[FIXED][SMALL][COOP] = N/8;
-				migrants[FIXED][SMALL][SELF] = N/8;
+				migrants[MUTIE][LARGE][COOP] = N/4;
+				migrants[MUTIE][LARGE][SELF] = N/4;
+				migrants[MUTIE][SMALL][COOP] = N/4;
+				migrants[MUTIE][SMALL][SELF] = N/4;
+				// migrants[MUTIE][LARGE][COOP] = N/8;
+				// migrants[MUTIE][LARGE][SELF] = N/8;
+				// migrants[MUTIE][SMALL][COOP] = N/8;
+				// migrants[MUTIE][SMALL][SELF] = N/8;
+				// migrants[FIXED][LARGE][COOP] = N/8;
+				// migrants[FIXED][LARGE][SELF] = N/8;
+				// migrants[FIXED][SMALL][COOP] = N/8;
+				// migrants[FIXED][SMALL][SELF] = N/8;
 				multi_each = function (multi, func) {
 					var total = 0;
 					$.each(multi, function (adapt, val) {

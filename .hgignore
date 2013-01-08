@@ -4,3 +4,5 @@ syntax: glob
 *.log
 *.fdb_latexmk
 *.synctex.gz
+*.bbl
+*.blg
