@@ -195,7 +195,7 @@
 							shares[a_ix][s_ix][p_ix] = INFLUX_RATE[size] * desire[a_ix][s_ix][p_ix] / totalDesire;
 						});
 						multi_each(counts, function(a_ix, s_ix, p_ix) {	//Ni(t+1) = Ni(t) + Si/C(c/s) - K*Ni(t)
-							counts[a_ix][s_ix][p_ix] = Math.floor(counts[a_ix][s_ix][p_ix] + shares[a_ix][s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[a_ix][s_ix][p_ix]);
+							counts[a_ix][s_ix][p_ix] = counts[a_ix][s_ix][p_ix] + shares[a_ix][s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[a_ix][s_ix][p_ix];
 						})
 						// this.mutate();
 					}
@@ -268,7 +268,7 @@
 					})
 					var scale = N/total;
 					multi_each(migrants, function(adapt, size, plan) {
-						migrants[adapt][size][plan] = Math.floor(migrants[adapt][size][plan] * scale);
+						migrants[adapt][size][plan] = migrants[adapt][size][plan] * scale;
 					})
 
 				};
