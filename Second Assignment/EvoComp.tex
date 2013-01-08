@@ -91,14 +91,14 @@ We used the parameters as in the original paper, plus these
   \centering
   \includegraphics[scale=1.25]{original.pdf}
   \caption{Left-hand plot: average environment and strategy through time. Right-hand plot: change in genotype frequencies over time. (Original figure \citep{orig})}
-  \label{Figure:original}
+  \label{fig:original}
 \end{figure}
 
 \begin{figure}[!ht]
   \centering
   \includegraphics{equalplot.pdf}
   \caption{My plot.}
-  \label{Figure:plot}
+  \label{fig:equalplot}
 \end{figure}
 
 All of the other genotypes eventually die out permanelty due to being outcompeted for resources (mention across and between groups varience) and then being scaled away in step 7[TODO: check]
@@ -141,10 +141,25 @@ on the order of one change in one group per cycle of reproduction, and so a valu
 \subsection{Results}
 ~1.5 pages
 % o   Results of extension (another 1.5 page)
+\begin{figure}[!ht]
+  \centering
+  \includegraphics{60geneqmutfix.pdf}
+  \caption{Wonderful 60gen proof of all that is beautiful.}
+  \label{fig:60geneqmutfix}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics{120geninteresting.pdf}
+  \caption{Robust to completely evil.}
+  \label{fig:120geninteresting}
+\end{figure}
 
 \section{Conclusion}
 ~1 page
 % o  What do you conclude from that -- significance of the extension results/critique/evaluation (final page)
+Increases stochasticity - particularly among mutability. As it has no inherent effect on fitness, it is self reinforcing. Often it'll select towards non-mutability as there is bias in that direction
+INvestigat the deffects of different/a range of mutation rates
 
 \bibliographystyle{plainnat}
 \bibliography{EvoComp}{}
@@ -155,23 +170,24 @@ on the order of one change in one group per cycle of reproduction, and so a valu
 % Powers, S., Penn, A., Watson, A.: Individual Selection for Cooperative Group Formation. Advances in Artificial Life: Proceedings of the Ninth European Conference on Artificial Life (ECAL 2007) (2007) 585--594
 
 % \end{thebibliography}
-
+\newpage
 \appendix
 \section{Additional cases TODO}
 \begin{figure}[!ht]
   \centering
-  \includegraphics{equalplot.pdf}
-  \caption{My plot.}
-  \label{Figure:plot}
+  \includegraphics{unevenplot.pdf}
+  \caption{Robust to 3/4 evil.}
+  \label{fig:unevenplot}
 \end{figure}
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics{equalplot.pdf}
-  \caption{My plot.}
-  \label{Figure:plot}
+  \includegraphics{sizeplot.pdf}
+  \caption{Mutation on size only.}
+  \label{fig:sizeplot}
 \end{figure}
 
+\newpage
 \section{Source}
 % Appendix: source code of what you implemented (include the source of everything you implemented as part of the pdf)
 % You may also upload a zip of all source code (if this includes any code you did not implement -- it must be clearly declared in a README file, and at the front of the report)

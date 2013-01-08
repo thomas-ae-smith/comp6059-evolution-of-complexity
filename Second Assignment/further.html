@@ -46,6 +46,7 @@
 				}
 
 				var migrants = newDataStructure();
+				migrants[MUTIE][LARGE][COOP] = N;
 				// migrants[MUTIE][LARGE][COOP] = N/8;
 				// migrants[MUTIE][LARGE][SELF] = N/8;
 				// migrants[MUTIE][SMALL][COOP] = N/8;
@@ -54,10 +55,6 @@
 				// migrants[FIXED][LARGE][SELF] = N/8;
 				// migrants[FIXED][SMALL][COOP] = N/8;
 				// migrants[FIXED][SMALL][SELF] = N/8;
-				migrants[FIXED][LARGE][COOP] = N/4;
-				migrants[FIXED][LARGE][SELF] = N/4;
-				migrants[FIXED][SMALL][COOP] = N/4;
-				migrants[FIXED][SMALL][SELF] = N/4;
 				multi_each = function (multi, func) {
 					var total = 0;
 					$.each(multi, function (adapt, val) {
@@ -195,9 +192,9 @@
 							shares[a_ix][s_ix][p_ix] = INFLUX_RATE[size] * desire[a_ix][s_ix][p_ix] / totalDesire;
 						});
 						multi_each(counts, function(a_ix, s_ix, p_ix) {	//Ni(t+1) = Ni(t) + Si/C(c/s) - K*Ni(t)
-							counts[a_ix][s_ix][p_ix] = counts[a_ix][s_ix][p_ix] + shares[a_ix][s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[a_ix][s_ix][p_ix];
+							counts[a_ix][s_ix][p_ix] = Math.floor(counts[a_ix][s_ix][p_ix] + shares[a_ix][s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[a_ix][s_ix][p_ix]);
 						})
-						// this.mutate();
+						this.mutate();
 					}
 
 
@@ -268,7 +265,7 @@
 					})
 					var scale = N/total;
 					multi_each(migrants, function(adapt, size, plan) {
-						migrants[adapt][size][plan] = migrants[adapt][size][plan] * scale;
+						migrants[adapt][size][plan] = Math.floor(migrants[adapt][size][plan] * scale);
 					})
 
 				};
