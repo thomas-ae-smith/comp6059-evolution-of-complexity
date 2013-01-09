@@ -20,31 +20,24 @@
 			var GROUP_SIZE = [40, 4];
 			var DEATH_RATE = 0.1;
 			var INFLUX_RATE = [50, 4];
+
 			//from section 3 of paper [coop, self]
 			var GROWTH_R = [0.018, 0.02];
 			var CONSUME_R = [0.1, 0.2];
-			var N = 4000;	//4000
-			var T = 120;	//120
+			var N = 4000;
+			var T = 120;
 			var t = 4;
 
 			//extension
 			var MUTATE_RATE = 0.002;
 
-			// var kinds = 4;
-			// var LARGE_COOP = 0;
-			// var LARGE_SELF = 1;
-			// var SMALL_COOP = 2;
-			// var SMALL_SELF = 3;
-
 			function Pool() {
-				//initialise with N individuals
-
-				// var migrants = [[N/kinds, N/kinds], [N/kinds, N/kinds]];
 				function newDataStructure() {
 					return [[[0, 0], [0, 0]],
 							[[0, 0], [0, 0]]];
 				}
 
+				//initialise with N individuals
 				var migrants = newDataStructure();
 				migrants[MUTIE][LARGE][COOP] = N;
 				// migrants[MUTIE][LARGE][COOP] = N/8;
@@ -55,6 +48,8 @@
 				// migrants[FIXED][LARGE][SELF] = N/8;
 				// migrants[FIXED][SMALL][COOP] = N/8;
 				// migrants[FIXED][SMALL][SELF] = N/8;
+
+				//helper function - passes all appropriate indexes to given function
 				multi_each = function (multi, func) {
 					var total = 0;
 					$.each(multi, function (adapt, val) {
@@ -64,9 +59,8 @@
 							})
 						})
 					})
-					return total;
+					return total;	//inbuilt summation support
 				}
-				console.log(migrants.slice(0));
 
 				var large_groups = [];
 				var small_groups = [];
@@ -79,33 +73,29 @@
 
 						var total, index, selfish, mutie, offset;
 						total = 0;
-						total = multi_each(migrants, function(adapt, size_index, plan) { 	//total of this size remaining
-							// console.log(size_index , " == ", size);
+						total = multi_each(migrants, function(adapt, size_index, plan) { 	//total of this size
 							if (size_index == size) {
 								return migrants[adapt][size_index][plan];
 							} else {
-								return 0;
+								return 0;	//only total correct size
 							}
 						});
-						// console.log("total = ", total);
-						for (var i = GROUP_SIZE[size] - 1; i >= 0; i--) {				//until this group is full
+						for (var i = GROUP_SIZE[size] - 1; i >= 0; i--) {	//until this group is full
 							index = Math.random() * total;					//random index into pool
 							offset = 0;
-							for (var j = 0; j < 4; j++) {
+							for (var j = 0; j < 4; j++) {					//search the four genotypes
 								mutie = (j >= 2)?1:0;
 								selfish = j % 2;
-								if (index < offset + migrants[mutie][size][selfish]) {
-									migrants[mutie][size][selfish]--;
-									counts[mutie][size][selfish]++;
-									break;
+								if (index < offset + migrants[mutie][size][selfish]) {	//if of this kind
+									migrants[mutie][size][selfish]--;					//move into group
+									counts[mutie][size][selfish]++;						//and out of pool
+									break;												//stop looking
 								} else {
-									offset += migrants[mutie][size][selfish];
+									offset += migrants[mutie][size][selfish];			//look further
 								}
 							};
-							total--;
+							total--;			//we know it's gone down by one, doesn't matter where
 						};
-						// console.log("total = ", total);
-						
 					})();
 
 					function verify() {				//use multi_each on counts to sum all groups, check correct
@@ -116,12 +106,11 @@
 
 					this.mutate = function() {
 						var offspring = newDataStructure();
-						multi_each(counts, function(adapt_index, size_index, plan_index) {		//for each genotype
-							if (adapt_index == MUTIE) {		//if you can mutate, do so
-								for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
+						multi_each(counts, function(adapt_index, size_index, plan_index) {	//for each genotype
+							if (adapt_index == MUTIE) {										//if you can mutate, do
+								for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {
 									if (Math.random() < MUTATE_RATE) {
-										offspring[adapt_index][size_index][(plan_index)?0:1]++;
-										// console.log("Mutation");
+										offspring[adapt_index][size_index][(plan_index)?0:1]++; //strategy
 									} else {
 										offspring[adapt_index][size_index][plan_index]++;
 									}
@@ -130,15 +119,13 @@
 								offspring[adapt_index][size_index][plan_index] += counts[adapt_index][size_index][plan_index];
 							};
 						})
-						// console.log("counts: " , counts, "offspring: ", offspring);
 						counts = offspring;
 						offspring = newDataStructure();
-						multi_each(counts, function(adapt_index, size_index, plan_index) {		//for each genotype
-							if (adapt_index == MUTIE) {		//if you can mutate, do so
-								for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
+						multi_each(counts, function(adapt_index, size_index, plan_index) {	//for each genotype
+							if (adapt_index == MUTIE) {										//if you can mutate, do
+								for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {
 									if (Math.random() < MUTATE_RATE) {
-										offspring[adapt_index][(size_index)?0:1][plan_index]++;
-										// console.log("Mutation");
+										offspring[adapt_index][(size_index)?0:1][plan_index]++; //size preference
 									} else {
 										offspring[adapt_index][size_index][plan_index]++;
 									}
@@ -147,15 +134,13 @@
 								offspring[adapt_index][size_index][plan_index] += counts[adapt_index][size_index][plan_index];
 							};
 						})
-						// console.log("counts: " , counts, "offspring: ", offspring);
 						counts = offspring;
 						offspring = newDataStructure();
-						multi_each(counts, function(adapt_index, size_index, plan_index) {		//for each genotype
-							if (adapt_index == MUTIE) {		//if you can mutate, do so
-								for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {	//for each individual
+						multi_each(counts, function(adapt_index, size_index, plan_index) {	//for each genotype
+							if (adapt_index == MUTIE) {										//if you can mutate, do
+								for (var i = counts[adapt_index][size_index][plan_index] - 1; i >= 0; i--) {
 									if (Math.random() < MUTATE_RATE) {
-										offspring[(adapt_index)?0:1][size_index][plan_index]++;
-										// console.log("Mutation");
+										offspring[(adapt_index)?0:1][size_index][plan_index]++; //mutability
 									} else {
 										offspring[adapt_index][size_index][plan_index]++;
 									}
@@ -164,18 +149,7 @@
 								offspring[adapt_index][size_index][plan_index] += counts[adapt_index][size_index][plan_index];
 							};
 						})
-						// console.log("counts: " , counts, "offspring: ", offspring);
 						counts = offspring;
-						// $(".data").append("After mutation: ");
-						// $(".data").append( counts[MUTIE][LARGE][COOP] + " " +
-						// 					 counts[MUTIE][LARGE][SELF] + " " +
-						// 					 counts[MUTIE][SMALL][COOP] + " " +
-						// 					 counts[MUTIE][SMALL][SELF] + " " +
-						// 					 counts[FIXED][LARGE][COOP] + " " +
-						// 					 counts[FIXED][LARGE][SELF] + " " +
-						// 					 counts[FIXED][SMALL][COOP] + " " +
-						// 					 counts[FIXED][SMALL][SELF] );
-						// $(".data").append("<br />");
 					}
 
 					this.reproduce = function() {
@@ -194,9 +168,8 @@
 						multi_each(counts, function(a_ix, s_ix, p_ix) {	//Ni(t+1) = Ni(t) + Si/C(c/s) - K*Ni(t)
 							counts[a_ix][s_ix][p_ix] = Math.floor(counts[a_ix][s_ix][p_ix] + shares[a_ix][s_ix][p_ix]/CONSUME_R[p_ix] - DEATH_RATE*counts[a_ix][s_ix][p_ix]);
 						})
-						this.mutate();
+						this.mutate();		//after reproduction, mutate
 					}
-
 
 					this.disperse = function() {
 						multi_each(counts, function(adapt_index, size_index, plan_index) {
@@ -213,13 +186,6 @@
 						$(".data").append(migrants[adapt][size][plan]/N + " ");
 					})
 					$(".data").append("<br />");
-
-					// // for raw
-					// $(".data").append("After scaling: ");
-					// multi_each(migrants, function(adapt, size, plan) {
-					// 	$(".data").append(migrants[adapt][size][plan] + " ");
-					// })
-					// $(".data").append("<br />");
 
 					//assign to groups (spares are unused)
 					while (migrants[MUTIE][LARGE][COOP] + migrants[MUTIE][LARGE][SELF] +
@@ -242,7 +208,6 @@
 					};
 
 					//return to pool
-					console.log("killing " + migrants[FIXED][LARGE][COOP] + " large coops");
 					migrants = newDataStructure();
 					$.each(large_groups, function (index, value){
 						value.disperse();
@@ -252,13 +217,6 @@
 					});
 					large_groups.length = small_groups.length = 0;
 
-
-					// $(".data").append("Before scaling: ");
-					// multi_each(migrants, function(adapt, size, plan) {
-					// 	$(".data").append(migrants[adapt][size][plan] + " ");
-					// })
-					// $(".data").append("<br />");
-
 					//rescale the pool
 					var total = multi_each(migrants, function(adapt, size, plan) {
 						return migrants[adapt][size][plan];
@@ -267,9 +225,7 @@
 					multi_each(migrants, function(adapt, size, plan) {
 						migrants[adapt][size][plan] = Math.floor(migrants[adapt][size][plan] * scale);
 					})
-
 				};
-					console.log(migrants.slice(0));
 			}
 
 			new Pool();
