@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{paralist}
 \usepackage[small]{titlesec}
+\usepackage[title]{appendix}
 \begin{document}
 \title      {\vspace{-2cm}\textbf{Individual Selection with Mutation for Cooperative Group Formation}}
 \author	    {Thomas Smith\\taes1g09@ecs.soton.ac.uk}
@@ -50,8 +51,10 @@ back to size $N$, retaining the proportion of individuals with each genotype.
   n_i(t+1) &= n_i(t) + \frac{r_i}{C_i} - Kn_i(t)
 \end{align}
 
-In the reimplementation, individuals are represented as aggregate populations by genotype. Each individual can specify two genes: one for size, and one for strategy, and each gene can take one of two values, large/small and cooperative/selfish, respectively. This results in four possible genotypes, and so a migrant pool is maintained of the total count of each of the four types. Each group formed also maintains only the total count of each genotype within it, and aggregation, reproduction, dispersal and scaling operations are all carried out by population rather than individually.\\
-\\
+\subsection{Representation}
+In the reimplementation, individuals are represented as aggregate populations by genotype. Each individual can specify two genes: one for size, and one for strategy, and each gene can take one of two values, large/small and cooperative/selfish, respectively. This results in four possible genotypes, and so a migrant pool is maintained of the total count of each of the four types. Each group formed also maintains only the total count of each genotype within it, and aggregation, reproduction, dispersal and scaling operations are all carried out by population rather than individually.
+
+
 The algorithm has no explicit fitness function - rather, an individual's fitness may be approximated by the total resource share of its genotype within the population as a whole. There is no crossover, but the algorithm could be said to be generational, as after each aggregation/dispersal round the whole population is rescaled back to a nominal `carrying capacity' ($N$). The rescaling can force populations below their minimum group sizes and hence to extinction when they are significantly outcompeted.\\
 %TODO: write more here
 \newpage
@@ -99,7 +102,7 @@ As in \citet{orig}, large individuals initially benefit from the resource bonus,
 % thise papers have done these things
 
 
-The original result can be shown to be quite robust: even in the case of severe imbalance in the initial genotype distribution, it is generally seen that the cooperative + small genotype successfully forms a niche and eventually fixes (Appendix~\ref{app:graphs}, figure~\ref{fig:unevenplot}). However, this is only possible when there exists a critical minimum population of cooperative + small individuals that between-groups variation can select in favour of. In the model as presented, if a particular genotype dies out or does not exist in the initial distribution, then it is never possible for it to (re)enter the gene pool. In certain situations, this can be seen as disadvantageous  - for example, in the original model, if the cooperative + small individuals were able to form large groups again once the selfish allele had been eradicated, then they could reap the resource bonus without exploitation by selfish individuals (as in Appendix~\ref{app:graphs}, figure~\ref{fig:sizeplot}).
+The original result can be shown to be quite robust: even in the case of severe imbalance in the initial genotype distribution, it is generally seen that the cooperative + small genotype successfully forms a niche and eventually fixes (Appendix~\ref{app:graphs}, figure~\ref{fig:unevenplot}). However, this is only possible when there exists a critical minimum population of cooperative + small individuals that between-groups variation can select in favour of. In the model as presented, if a particular genotype dies out or does not exist in the initial distribution, then it is never possible for it to (re)enter the gene pool. In certain situations, this can be seen as disadvantageous  - for example, if in the original model the cooperative + small individuals were able to form large groups again once the selfish allele had been eradicated, then they could reap the resource bonus without exploitation by selfish individuals.
 
 As an extension to the original model, this paper then presents analysis of cases where individuals may occasionally spontaneously change their size preference or strategy. An additional gene is introduced to each individual which both controls and is subject to these spontaneous changes, in a manner similar to a low rate of mutation across the whole population \citep{adaption}. The expectation is that the addition of mutable individuals will make the niche construction process possible in a wider range of more initially hostile populations.
 %TODO: specify the actual question
@@ -111,23 +114,31 @@ However, the original reasoning behind the heuristic leads to a more effective v
 \subsection{Results}
 % ~1.5 pages
 % o   Results of extension (another 1.5 page)
+In order to investigate the specific scenario detailed above, individual mutation was initially restricted to act upon the size gene only.
+\vspace{-.5cm}
 \begin{figure}[!ht]
   \centering
   \includegraphics{sizeplot.pdf}
   \caption{Mutation on the size gene allows the cooperative + large genotype to reappear and then eventually flourish once the selfish allele has died out.}
   \label{fig:sizeplot}
 \end{figure}
+
+The initial plot was then recreated using an equal distribution of all eight genotypes, and therefore an equal proportion of mutable to non-mutable individuals - shown on these plots as a separate aggregate proportion.
+\vspace{-.5cm}
+
 \begin{figure}[!ht]
   \centering
   \includegraphics{60geneqmutfix.pdf}
-  \caption{In many cases, the addition of mutable individuals leads to the same outcome more quickly. The increase or decrease in proportion of mutable individuals is highly self-reinforcing, and though the ultimate outcome is largely stochastic, exhibits a generally non-mutable bias.}
+  \caption{In this case, the addition of mutable individuals leads to the same outcome more quickly, and the mutable individuals die out.}
   \label{fig:60geneqmutfix}
 \end{figure}
+
+Finally, with a high proportion of mutable individuals it is possible to start with an inital population distribution consisting of only a single genotype, and still demonstrate the niche creation process leading to the small + cooperative genotype dominating the population.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics{120geninteresting.pdf}
-  \caption{With the addition of mutability, the niche-creation process can occur and lead to fixation even in initial distributions that contain no small + cooperative individuals.}
+  \caption{The population still contains a high proportion of mutable individuals after 120 generations, and so unlike in Figure~\ref{fig:60geneqmutfix} it is still possible that another genotype could later come to dominate, as in Figure~\ref{fig:sizeplot}.}
   \label{fig:120geninteresting}
 \end{figure}
 
@@ -135,16 +146,20 @@ However, the original reasoning behind the heuristic leads to a more effective v
 % ~1 page
 % o  What do you conclude from that -- significance of the extension results/critique/evaluation (final page)
 The addition of mutable individuals increases stochasticity - particularly for the ultimate proportion of mutable individuals. As it has no inherent effect on fitness, it is self reinforcing. Often the algorithm will select towards non-mutability as there is bias in that direction.
+The increase or decrease in proportion of mutable individuals is highly self-reinforcing, and though the ultimate outcome is largely stochastic, exhibits a generally non-mutable bias.
 
 One area for further investigation would be to allow mutation on size preference to act in a more granular manner, as suggested in \citet{thesis}. Selfish behavior
 % Investigate the effects of different/a range of mutation rates
+
+(Appendix~\ref{app:graphs}, figure~\ref{fig:further1})
+
 
 \newpage
 \bibliographystyle{plainnat}
 \bibliography{EvoComp}{}
 
 \newpage
-\appendix
+\begin{appendices}
 \section{Algorithm parameters}
 \label{app:parameters}
 \vspace{-.5cm}
@@ -177,14 +192,18 @@ One area for further investigation would be to allow mutation on size preference
   \centering
   \includegraphics{further1.pdf}
   \caption{Compare to Figure~\ref{fig:120geninteresting}. The initial distributions differ only in the proportion of mutable individuals, yet provide startlingly different oucomes.}
-  \label{fig:sizeplot}
+  \label{fig:further1}
 \end{figure}
 
 
-% \newpage
-% \section{Source}
+\newpage
+\section{Source code}
+\subsection*{base.html}
+\subsection*{further.html}
 % Appendix: source code of what you implemented (include the source of everything you implemented as part of the pdf)
 % You may also upload a zip of all source code (if this includes any code you did not implement -- it must be clearly declared in a README file, and at the front of the report)
+
+\end{appendices}
 
 \end{document}
 
