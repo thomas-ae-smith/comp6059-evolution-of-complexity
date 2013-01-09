@@ -1,6 +1,5 @@
 \documentclass[11pt]{article}
 \usepackage{multicol}
-% \usepackage{fullpage}
 \usepackage{url}
 \usepackage{graphicx}
 \usepackage{natbib}
@@ -8,11 +7,10 @@
 \usepackage{paralist}
 \usepackage[small]{titlesec}
 \begin{document}
-\title      {\textbf{COMP6026: Assignment 2}}
+\title      {\vspace{-2cm}\textbf{Individual Selection with Mutation for Cooperative Group Formation}}
 \author	    {Thomas Smith\\taes1g09@ecs.soton.ac.uk}
 \date       {\today}
 \maketitle
-% \begin{multicols}{2}
 \section{Introduction}
 % 1.5 pages
 % o   Introduction: You need not spend more than 1.5 pages describing the original paper.
@@ -26,79 +24,63 @@
 % ?         All parameters (enough detail so a reader could re-implement the GA)
 
 %basic introduction
-\citet*{orig} show that environmental conditions need not be externally imposed in order to promote the evolution of cooperative traits. They present a model which permits suitable conditions to arise via individual selection, and show that even in environments that initially select for selfish behaviour, a niche construction process can allow for cooperative behaviours to be ultimately successful. This paper reimplements the algorithm described, and exends the model to show not only that the process is accelerated by the introduction of mutation to the model, but also that a side-effect of the niche construction process then favours selecting against individuals that are able to mutate, resulting in a more stable niche.
+\citet*{orig} show that environmental conditions need not be externally imposed in order to promote the evolution of cooperative traits. They present a model which permits suitable conditions to arise via individual selection, and show that even in environments that initially select for selfish behaviour, a niche construction process can allow for cooperative behaviours to be ultimately successful. This paper reimplements the algorithm described, and extends the model to show not only that the process is accelerated by the introduction of mutation to the model, but also that a side-effect of the niche construction process then favours selecting against individuals that are able to mutate, resulting in a more stable niche.
 
 
 
 
 \section{Reimplementation}
 %description of original paper
-In \citet{orig}, an algorithm is presented which demonstrates that under the right circumstances, individuals can select for environments that promote cooperation. Using the trait-group aggregation and dispersal model presented in \citet{wilson}, individuals are permitted to select for control both over individual strategy and initial group size. Groups are formed according to individual size preferences, and with a random but globally proportionate composition of strategies. Individuals in groups are then reproduced over a number of generations, with shares of the group's resources ($r_i$) allocated according to the proportion of individuals with a particular genotype within that group (equations \ref{eq:desire} and \ref{eq:shares}). This results in an environment where the cooperative trait can have greater individual fitness, as between-group variation ultimately globally favours the growth of groups with a higher proportion of cooperative individuals.
+In \citet{orig}, an algorithm is presented which demonstrates that under the right circumstances, individuals can select for environments that promote cooperation. Using the trait-group aggregation and dispersal model presented in \citet{wilson}, individuals are permitted to select for control both over individual strategy and initial group size. Large groups receive a resource bonus~\citep{allee}, but are also more susceptible to exploitation by selfish individuals. Groups are formed according to individual size preferences, and with a random but globally proportionate composition of strategies. Individuals in groups are then reproduced over a number of generations, with shares of the group's resources ($r_i$) allocated according to the proportion of individuals with a particular genotype within that group. When using the parameters in Appendix~\ref{app:parameters}, this should result in individuals selecting away from the resource bonus of the larger groups in favour of an environment where the cooperative trait has greatest individual fitness. In small groups, stochastic between-group variation ultimately globally favours the growth of groups with a higher proportion of cooperative individuals.
 
-
-\begin{align} \label{eq:desire}
-  r_i &= \frac{n_iG_iC_i}{\sum\limits_{j}(n_jG_jC_j)}R
-\end{align}
-
-\begin{align} \label{eq:shares}
-  n_i(t+1) &= n_i(t) + \frac{r_i}{C_i} - Kn_i(t)
-\end{align}
-
-% \subsection{Representation}
-In the reimplementation, individuals are represented as aggregate populations by genotype. Each individual can specify two genes: one for size, and one for strategy, and each gene can take one of two values, large/small and cooperative/selfish, respectively. This results in four possible genotypes, and so a migrant pool is maintained of the total count of each of the four types. Each group also maintains only the total count of each genotype within it, and aggregation, reproduction, dispersal and scaling operations are all carried out by population rather than individually.\\
-\\
-The algorithm has no explicit fitness function - rather, an individual's fitness may be approximated by the total resource share of its genotype within the population as a whole. There is no crossover, but the algorithm could be said to be generational, as after each aggregation/dispersal round the whole population is rescaled back to a nominal `carrying capacity' ($N$).\\
-
-% \subsection{Parameters and algorithm}
-
-After initialising the migrant pool with $N$ individuals, \citet{orig} presents the following algorithm as an implementation of the trait-aggregation model. The steps represent a single cycle, and should be repeated for $T$ generations.\\
+After initialising the migrant pool with $N$ individuals, \citet{orig} present the following algorithm as an implementation of the trait-aggregation model. The steps represent a single cycle, and should be repeated for $T$ generations.\\
 \begin{compactenum}
 \item\textbf{Aggregation:} Assign individuals in the migrant pool randomly to groups according to their size preference - each group will have a random composition of strategies, but the average should be proportionate to the global ratios. Surplus individuals may be discarded.
-\item\textbf{Reproduction:} Perform reproduction within groups - equation \ref{eq:desire} gives the resource share that each genotype population recieves, and equation \ref{eq:shares} gives the resulting change in population size. Repeat for $t$ generations.
+\item\textbf{Reproduction:} Perform reproduction within groups - eq. \ref{eq:desire} gives the resource share that each genotype population receives, and eq. \ref{eq:shares} gives the resulting change in population size. Repeat for $t$ generations.
 \item\textbf{Dispersal:} Return the progeny of each group
 to the migrant pool.
 \item\textbf{Scaling:} Rescale the migrant pool
 back to size $N$, retaining the proportion of individuals with each genotype.
 \end{compactenum}
 
+\begin{align} \label{eq:desire}
+  r_i &= \frac{n_iG_iC_i}{\sum\limits_{j}(n_jG_jC_j)}R
+\end{align}
+\begin{align} \label{eq:shares}
+  n_i(t+1) &= n_i(t) + \frac{r_i}{C_i} - Kn_i(t)
+\end{align}
 
-\begin{table}[!ht]
-  \centering
-  \begin{tabular}{r|c|ccr|c}
-  Behaviour parameters	& Cooperative	& Selfish	&  & \multicolumn{1}{c}{} & \\ \cline{1-3}
-  Growth rate, $G_i$			& 0.018			& 0.02		&  & Global parameters	& Value\\ \cline{5-6}
-  Consumption rate, $C_i$		& 0.1			& 0.2		&  & Population size, $N$	& 4000\\
-  \multicolumn{1}{r}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} &  & Generations, $T$ & 120 \\
-  Size parameters		& Large			& Small		&  & Reproductions, $t$~ 		& 4\\ \cline{1-3}
-  Group size, $S_i$			& 40			& 4			&  & Death rate, $K$ & 0.1\\
-  Resource influx, $R_i$		& 50			& 4			&  & \multicolumn{1}{c}{} & \\
-  \end{tabular}
-  \caption{Parameters from \cite{orig}, used throughout.}
-  \label{table:param}
-\end{table}
-
+In the reimplementation, individuals are represented as aggregate populations by genotype. Each individual can specify two genes: one for size, and one for strategy, and each gene can take one of two values, large/small and cooperative/selfish, respectively. This results in four possible genotypes, and so a migrant pool is maintained of the total count of each of the four types. Each group formed also maintains only the total count of each genotype within it, and aggregation, reproduction, dispersal and scaling operations are all carried out by population rather than individually.\\
+\\
+The algorithm has no explicit fitness function - rather, an individual's fitness may be approximated by the total resource share of its genotype within the population as a whole. There is no crossover, but the algorithm could be said to be generational, as after each aggregation/dispersal round the whole population is rescaled back to a nominal `carrying capacity' ($N$). The rescaling can force populations below their minimum group sizes and hence to extinction when they are significantly outcompeted.\\
+%TODO: write more here
+\newpage
 \subsection{Results}
 % ~1 page
 % o   Reimplementated Results (~1 page)
 % ?         The reimplemented figures (side by side with the originals)
 % ?         Discussion of what the results show/don't show, what worked/didn't work, what you learned
-
+When the reimplemented algorithm is run using the parameters in Appendix~\ref{app:parameters}, the output closely follows the original findings (Figures~\ref{fig:original} and~\ref{fig:equalplot}).
+\vspace{-.5cm}
 \begin{figure}[!ht]
   \centering
   \includegraphics[scale=1.25]{original.pdf}
-  \caption{Left: average environment and strategy through time. \\Right: change in genotype frequencies over time. \citep{orig} }
+  \caption{Left: average environment and strategy through time. \newline Right: change in genotype frequencies over time. \citep{orig} }
   \label{fig:original}
 \end{figure}
 
 \begin{figure}[!ht]
   \centering
   \includegraphics{equalplot.pdf}
-  \caption{Results provided by reimplemented algorithm, as above. The plots match to a high degree of accuracy, showing accurate reimplementation. %\small{(Note: both left plots display total population sizes of the large and selfish alleles, rather than the group size and resource usage as labelled.)}
+  \caption{Results provided by reimplemented algorithm, as above. The plots match to a high degree of accuracy, showing accurate reimplementation. 
   }
   \label{fig:equalplot}
 \end{figure}
 
-% All of the other genotypes eventually die out permanelty due to being outcompeted for resources (mention across and between groups varience) and then being scaled away in step 7[TODO: check]
+%\small{(Note: both left plots display total population sizes of the large and selfish alleles, rather than the group size and resource usage as labelled.)}
+As in \citet{orig}, large individuals initially benefit from the resource bonus, with large + selfish individuals flourishing as expected for the first few generations. Without a healthy population of large + cooperative individuals to exploit, the selfish individuals begin to decrease in frequency. Among the small groups, between-group variance exerts a selective pressure against groups containing selfish individuals \citep{Watson2011}, eventually driving the selfish allele extinct and allowing the cooperative + small genotype to fix in the population at equilibrium.
+
+% All of the other genotypes eventually die out permanently due to being outcompeted for resources (mention across and between groups variance) and then being scaled away in step 7[TODO: check]
 \clearpage
 \section{Extension}
 % ~1 page
@@ -111,32 +93,30 @@ back to size $N$, retaining the proportion of individuals with each genotype.
 % ?         What do you expect to happen (what might happen)?
 % ?         Why do you think that?
 
-%choice of extionstion
-% a numenbt or extensiotns of the original paper exist
+%choice of extension
+% a number of extensions of the original paper exist
 % \citet{thesis} recommends altering the numebr of generations before breeding, or restiriction miigrations
 % thise papers have done these things
 
 
-The original result can be shown to be quite robust: even in the case of severe imbalance in the inital genotype distribution, it is generally seen that the cooperative + small genotype successfully forms a niche and eventually fixes (Appendix A, figure \ref{fig:unevenplot}). However, this is only possible when there exists a critical minimum population of cooperative + small individuals to survive long enough that between-groups variation begins to select in favour of that genotype. In the model as presented, if a particular genotype dies out or does not exist in the initial distribution, then it is never possible for it to (re)enter the gene pool. In certain situations, this can be seen as disvantageous - for example, in the original model, if the cooperative + small individuals were able to form larger groups again once the selfish allele had been eradicated, then they could reap the resource bonus without exploitation by selfish individuals (as in Appendix A, figure \ref{fig:sizeplot}).
+The original result can be shown to be quite robust: even in the case of severe imbalance in the initial genotype distribution, it is generally seen that the cooperative + small genotype successfully forms a niche and eventually fixes (Appendix~\ref{app:graphs}, figure~\ref{fig:unevenplot}). However, this is only possible when there exists a critical minimum population of cooperative + small individuals that between-groups variation can select in favour of. In the model as presented, if a particular genotype dies out or does not exist in the initial distribution, then it is never possible for it to (re)enter the gene pool. In certain situations, this can be seen as disadvantageous  - for example, in the original model, if the cooperative + small individuals were able to form large groups again once the selfish allele had been eradicated, then they could reap the resource bonus without exploitation by selfish individuals (as in Appendix~\ref{app:graphs}, figure~\ref{fig:sizeplot}).
 
-As an extension to the original model, this paper then presents analysis of cases where individuals are allowed to change size preference, behaviour and their own mutation rate, in a manner similar to a low rate of mutation across the whole population \citep{adaption}.
-
-% In the original paper, once a specific genotype has fixed, it is impossible for any other genotype to invade. Specifically, in order for any genotype to fix, all other genypes must be extinct.
-% What happens if we add mutatoin?
-% Are the results from the original paper robust in the face of new condidiotns
-% Several scenarios to consider:
-%  mutation only on size: predicatble results: once the selfish allele has died out, large + cooperative individuals that arise via mutation of the dominant small + cooperative genotype are able to flourish, and outcompete the other genotypes until they reach relative fixation (absolute fixation does not occur due to the occasional mutation of small + cooperative individuals).
-%  Mutation only on behaviour, and mutation on size and behaviour: i think leads to large + selfish near-fixation.
-%  Allowing individuals to select for the ability to mutate
-
+As an extension to the original model, this paper then presents analysis of cases where individuals may occasionally spontaneously change their size preference or strategy. An additional gene is introduced to each individual which both controls and is subject to these spontaneous changes, in a manner similar to a low rate of mutation across the whole population \citep{adaption}. The expectation is that the addition of mutable individuals will make the niche construction process possible in a wider range of more initially hostile populations.
+%TODO: specify the actual question
 \subsection{Representation}
-Once again, individuals are represented by genotype as populations of identical clones. As there are three distinct genes, there are now eight separate combinations of alleles representing populations in the migrant pool and in each group. The reproduction code has been modified to respect the possibility of newly mutated individuals existing in a group size different to that specified by their genotype. Mutation potentially occurs after each within-group reproduction cycle.
+Once again, individuals are represented by genotype as populations of identical clones. As there are three distinct genes, there are now eight separate combinations of alleles representing populations in the migrant pool and in each group. The reproduction code has been modified to respect the possibility of newly mutated individuals present in a group size different to that specified by their genotype. Mutation potentially occurs after each within-group reproduction cycle.
 
-\citet{optimal} notes that `optimal per-locus mutation rates depend mainly on $1/L$ (the reciprocal of the genotype length)'. In this model, the length of each individual's genotype is only 3, and a mutation rate of $1/3$ is high enough to cause no significant solution to arise. %I don't like the end of the sentence
-However, the original reasoning behind the heuristic leads to a more effective value for mutation within the model. The use of a mutation rate of $1/L$ is intended to result in an average of one change to one gene in the individual per reproduction - in the model presented, the desired mutation rate is on the order of one change of one group per cycle of reproduction, and so a value of $1/num\_groups$ is more appropriate. Though the actual number of groups fluctuates based on prevailing group size preference, 550 groups may be taken as a reasonable approximation\footnote{~using the parameters in table~\ref{table:param} with equal distribution of genotypes: $\frac{2000}{40} + \frac{2000}{4} = 550$}. A mutation rate $M$ of $\frac{1}{550} \approx 0.002$ is therefore used throughout the rest of the paper.
+\citet{optimal} notes that `optimal per-locus mutation rates depend mainly on $1/L$ (the reciprocal of the genotype length)'. In this model, the length of each individual's genotype is 3, and a mutation rate of $1/3$ is high enough to cause no significant solution to arise. %I don't like the end of the sentence
+However, the original reasoning behind the heuristic leads to a more effective value for mutation within the model. The use of a mutation rate of $1/L$ is intended to result in an average of one change to one gene in an individual per reproduction - in the model presented, the desired mutation rate is on the order of one change of one group per cycle of reproduction, and so a value of $1/num\_groups$ is more appropriate. Though the actual number of groups fluctuates based on prevailing group size preference, 550 groups may be taken as a reasonable approximation\footnote{~using the parameters in table~\ref{table:param} with equal distribution of genotypes: $\frac{2000}{40} + \frac{2000}{4} = 550$}. A mutation rate $M$ of $\frac{1}{550} \approx 0.002$ is therefore used throughout the rest of the paper.
 \subsection{Results}
 % ~1.5 pages
 % o   Results of extension (another 1.5 page)
+\begin{figure}[!ht]
+  \centering
+  \includegraphics{sizeplot.pdf}
+  \caption{Mutation on the size gene allows the cooperative + large genotype to reappear and then eventually flourish once the selfish allele has died out.}
+  \label{fig:sizeplot}
+\end{figure}
 \begin{figure}[!ht]
   \centering
   \includegraphics{60geneqmutfix.pdf}
@@ -147,7 +127,7 @@ However, the original reasoning behind the heuristic leads to a more effective v
 \begin{figure}[!ht]
   \centering
   \includegraphics{120geninteresting.pdf}
-  \caption{With the addition of mutability, the niche-creation process can occur even in initial distributions that contain no small + cooperative individuals.}
+  \caption{With the addition of mutability, the niche-creation process can occur and lead to fixation even in initial distributions that contain no small + cooperative individuals.}
   \label{fig:120geninteresting}
 \end{figure}
 
@@ -155,31 +135,48 @@ However, the original reasoning behind the heuristic leads to a more effective v
 % ~1 page
 % o  What do you conclude from that -- significance of the extension results/critique/evaluation (final page)
 The addition of mutable individuals increases stochasticity - particularly for the ultimate proportion of mutable individuals. As it has no inherent effect on fitness, it is self reinforcing. Often the algorithm will select towards non-mutability as there is bias in that direction.
-% INvestigat the deffects of different/a range of mutation rates
 
+One area for further investigation would be to allow mutation on size preference to act in a more granular manner, as suggested in \citet{thesis}. Selfish behavior
+% Investigate the effects of different/a range of mutation rates
+
+\newpage
 \bibliographystyle{plainnat}
 \bibliography{EvoComp}{}
-% \section*{References}
-% \begin{thebibliography}{9}
 
-% \bibitem{orig} 
-% Powers, S., Penn, A., Watson, A.: Individual Selection for Cooperative Group Formation. Advances in Artificial Life: Proceedings of the Ninth European Conference on Artificial Life (ECAL 2007) (2007) 585--594
-
-% \end{thebibliography}
 \newpage
 \appendix
+\section{Algorithm parameters}
+\label{app:parameters}
+\vspace{-.5cm}
+\begin{table}[!ht]
+  \centering
+  \begin{tabular}{r|c|ccr|c}
+  Behaviour parameters  & Cooperative & Selfish &  & \multicolumn{1}{c}{} & \\ \cline{1-3}
+  Growth rate, $G_i$      & 0.018     & 0.02    &  & Global parameters  & Value\\ \cline{5-6}
+  Consumption rate, $C_i$   & 0.1     & 0.2   &  & Population size, $N$ & 4000\\
+  \multicolumn{1}{r}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} &  & Generations, $T$ & 120 \\
+  Size parameters   & Large     & Small   &  & Reproductions, $t$~    & 4\\ \cline{1-3}
+  Group size, $S_i$     & 40      & 4     &  & Death rate, $K$ & 0.1\\
+  Resource influx, $R_i$    & 50      & 4     &  & \multicolumn{1}{c}{} & \\
+  \end{tabular}
+  \caption{Parameters from \cite{orig}, used throughout.}
+  \label{table:param}
+\end{table}
+
 \section{Additional graphs}
+\label{app:graphs}
+\vspace{-.5cm}
 \begin{figure}[!ht]
   \centering
   \includegraphics{unevenplot.pdf}
   \caption{The model presented in \citet{orig} is robust even in the face of severe imbalance in the initial genotype distribution.}
   \label{fig:unevenplot}
 \end{figure}
-
+\vspace{-.5cm}
 \begin{figure}[!ht]
   \centering
-  \includegraphics{sizeplot.pdf}
-  \caption{Mutation on size only allows the cooperative + large genotype to reappear and then eventually flourish once the selfish allele has died out.}
+  \includegraphics{further1.pdf}
+  \caption{Compare to Figure~\ref{fig:120geninteresting}. The initial distributions differ only in the proportion of mutable individuals, yet provide startlingly different oucomes.}
   \label{fig:sizeplot}
 \end{figure}
 
@@ -189,7 +186,6 @@ The addition of mutable individuals increases stochasticity - particularly for t
 % Appendix: source code of what you implemented (include the source of everything you implemented as part of the pdf)
 % You may also upload a zip of all source code (if this includes any code you did not implement -- it must be clearly declared in a README file, and at the front of the report)
 
-% \end{multicols}
 \end{document}
 
 
@@ -200,7 +196,7 @@ o   Introduction: You need not spend more than 1.5 pages describing the original
 ?         What you evolved including
 ?         How you represented individuals
 ?         What fitness function did you define
-? What kind of GA you used
+?         What kind of GA you used
 ?         Steady state/ generational?  Tournament selection/ fitness proportionate (roulette wheel)?
 ?         What kind of crossover (if any) you used.
 ?         All parameters (enough detail so a reader could re-implement the GA)
@@ -211,7 +207,7 @@ o   Describe your extension  (another page)
 ?        What is your research question/hypothesis?
 ?         e.g., 'compare x with y' or 'add x and see what difference it makes compared to not(x)'.
 ?         Describe methods
-Any advancements you made
+?         Any advancements you made
 ?         Support the value of asking that question (using literature)
 What do you expect to happen (what might happen)?
 Why do you think that?
