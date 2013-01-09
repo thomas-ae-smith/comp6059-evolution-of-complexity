@@ -18,6 +18,7 @@
 			var GROUP_SIZE = [40, 4];
 			var DEATH_RATE = 0.1;
 			var INFLUX_RATE = [50, 4];
+
 			//from section 3 of paper [coop, self]
 			var GROWTH_R = [0.018, 0.02];
 			var CONSUME_R = [0.1, 0.2];
@@ -33,11 +34,7 @@
 
 			function Pool() {
 				//initialise with N individuals
-
-				// var migrants = [N/kinds, N/kinds, N/kinds, N/kinds];
-				var migrants = [N/(3*kinds), (3*N)/kinds, N/(3*kinds), N/(3*kinds)];
-				console.log(migrants.slice(0));
-				var data = [migrants.slice(0)]; //returns an identical copy (clone)
+				var migrants = [N/kinds, N/kinds, N/kinds, N/kinds];
 
 				var large_groups = [];
 				var small_groups = [];
@@ -52,7 +49,7 @@
 						for (var i = GROUP_SIZE[size] - 1; i >= 0; i--) {				//until this group is full
 							total = migrants[offset] + migrants[offset+1];	//total size of pool remaining
 							index = Math.random() * total;					//random index into pool
-							selfish = (index > migrants[offset]);			//is there a selfish individual at this offset?
+							selfish = (index > migrants[offset]);			//selfish individual at this offset?
 							migrants[offset+Number(selfish)]--;				//decrement the appropriate migrant pool
 							counts[Number(selfish)]++						//increment the pool in this group
 						};
@@ -62,7 +59,6 @@
 					function verify() {
 						return (counts[0] + counts[1]) == GROUP_SIZE[size];
 					}
-					// console.log("Group verified:", verify());
 
 					this.reproduce = function() {
 						var shares = [0,0];
@@ -84,8 +80,6 @@
 
 				//for T iterations
 				while (T-- > 0) {
-					//for aggregate.dat
-					// $(".data").append(/*120-T + ": " + */(migrants[0]+migrants[1])/N + " " + (migrants[1]+migrants[3])/N + "<br />");
 					
 					//for individual.dat
 					$(".data").append(migrants[0]/N + " " + migrants[1]/N + " " + migrants[2]/N + " " + migrants[3]/N + "<br />");
@@ -124,10 +118,7 @@
 						migrants[index] = value * N / total;
 					});
 
-					//save the data
-					data.push(migrants.slice(0)); //store a clone
 				};
-					console.log(migrants.slice(0));
 			}
 
 			new Pool();
